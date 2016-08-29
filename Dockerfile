@@ -1,5 +1,5 @@
 #Latest version of node tested on.
-FROM hypriot/rpi-node:latest
+FROM dahlb/alpine-node:latest
 
 WORKDIR /app
 
