@@ -1,7 +1,10 @@
 const express = require('express');
 const request = require('request');
+const morgan = require('morgan');
 
 let app = express();
+
+app.use(morgan('tiny'));
 
 app.get('/info', (req, res) => {
 	request.get('http://unix:/var/run/docker.sock:/info', {headers: {host: 'http'}}, (e, r, b) => {
@@ -15,9 +18,14 @@ app.get('/images', (req, res) => {
 	});
 });
 
-app.get('/containers/id?', (req, res) => {
-	if (id) { id = id + '/'; }
-	request.get(`http://unix:/var/run/docker.sock:/containers/${id}json`, {headers: {host: 'http'}}, (e, r, b) => {
+app.get('/containers', (req, res) => {
+	request.get(`http://unix:/var/run/docker.sock:/containers/json`, {headers: {host: 'http'}}, (e, r, b) => {
+		res.end(b);
+	});
+});
+
+app.get('/containers/:id', (req, res) => {
+	request.get(`http://unix:/var/run/docker.sock:/containers/${req.params.id}/json`, {headers: {host: 'http'}}, (e, r, b) => {
 		res.end(b);
 	});
 });
@@ -60,4 +68,8 @@ app.get('/tasks', (req, res) => {
 
 app.listen(3333, function() {
 	console.log('App listening on port 3333!');
+});
+
+process.on('SIGTERM', () => {
+	app.close();
 });
