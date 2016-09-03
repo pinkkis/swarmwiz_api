@@ -1,75 +1,57 @@
 const express = require('express');
 const request = require('request');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const settings = require('./modules/settings');
+const infoQuery = require('./modules/infoQuery');
 
 let app = express();
 
-app.use(morgan('tiny'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(morgan('dev'));
 
-app.get('/info', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/info', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
+/**
+ * startup
+ * get node info
+ */
+
+infoQuery();
+
+/**
+ * routes
+ */
+
+app.use('/api', require('./routes/info'));
+app.use('/api', require('./routes/version'));
+app.use('/api', require('./routes/ping'));
+app.use('/api', require('./routes/volumes'));
+app.use('/api', require('./routes/containers'));
+app.use('/api', require('./routes/images'));
+app.use('/api', require('./routes/networks'));
+app.use('/api', require('./routes/events'));
+app.use('/api', require('./routes/swarm'));
+app.use('/api', require('./routes/services'));
+app.use('/api', require('./routes/tasks'));
+app.use('/api', require('./routes/nodes'));
+
+app.get('/', (req, res) => res.json({message: 'running...'}));
+
+app.get('*', (req, res) => res.status(404).json({message: 'not found'}));
+app.post('*', (req, res) => res.status(404).json({message: 'not found'}));
+app.put('*', (req, res) => res.status(404).json({message: 'not found'}));
+app.delete('*', (req, res) => res.status(404).json({message: 'not found'}));
+
+/**
+ * Start app
+ */
+process.on('SIGINT', () => {
+	process.exit(0);
 });
-
-app.get('/images', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/images/json', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/containers', (req, res) => {
-	request.get(`http://unix:/var/run/docker.sock:/containers/json`, {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/containers/:id', (req, res) => {
-	request.get(`http://unix:/var/run/docker.sock:/containers/${req.params.id}/json`, {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/services', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/services', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/networks', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/networks', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-// app.get('/events', (req, res) => {
-// 	request.get('http://unix:/var/run/docker.sock:/events', {headers: {host: 'http'}}, (e, r, b) => {
-// 		res.end(b);
-// 	});
-// });
-
-app.get('/nodes', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/nodes', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/swarm', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/swarm', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.get('/tasks', (req, res) => {
-	request.get('http://unix:/var/run/docker.sock:/tasks', {headers: {host: 'http'}}, (e, r, b) => {
-		res.end(b);
-	});
-});
-
-app.listen(3333, function() {
-	console.log('App listening on port 3333!');
-});
-
 process.on('SIGTERM', () => {
-	app.close();
+	process.exit(0);
+});
+
+app.listen(settings.apiPort, () => {
+	console.log(`Swarmwiz api listening on port ${settings.apiPort}...`);
 });

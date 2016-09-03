@@ -14,6 +14,7 @@ ADD . /app
 
 #Default port to expose.
 ENV PORT 3333
+ENV SOCK /var/run/docker.sock
 EXPOSE 3333
 
 CMD ["npm","start"]

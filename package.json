@@ -11,7 +11,9 @@
   "author": "Kristian Koivisto-Kokko <pinkkis@gmail.com> (http://pinkkis.com/)",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "express-json-promise": "^0.1.2",
     "morgan": "^1.7.0",
     "request": "^2.74.0"
   }
