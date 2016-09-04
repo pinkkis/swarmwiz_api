@@ -43,7 +43,7 @@ app.put('*', (req, res) => res.status(404).json({message: 'not found'}));
 app.delete('*', (req, res) => res.status(404).json({message: 'not found'}));
 
 /**
- * Start app
+ * set up process listeners
  */
 process.on('SIGINT', () => {
 	process.exit(0);
@@ -51,7 +51,15 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
 	process.exit(0);
 });
+process.on('uncaughtException', (err) => {
+  console.error('uncaughtException: ' + err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
 
+/**
+ * start listening
+ */
 app.listen(settings.apiPort, () => {
 	console.log(`Swarmwiz api listening on port ${settings.apiPort}...`);
 });
